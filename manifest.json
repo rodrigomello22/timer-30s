@@ -1,0 +1,9 @@
+{
+  "name": "Timer 30s",
+  "short_name": "Timer 30s",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#0b0d10",
+  "theme_color": "#0b0d10",
+  "description": "Timer sincronizado com o relógio real que reinicia a cada 30 segundos."
+}
