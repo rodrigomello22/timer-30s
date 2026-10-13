@@ -2,175 +2,114 @@
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-  <meta name="theme-color" content="#0b0d10" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#252525" />
+
   <title>Timer 30s</title>
-  <link rel="manifest" href="manifest.json" />
+
   <style>
-    :root{
-      --bg:#0b0d10;
-      --panel:#14181d;
-      --panel2:#1b2027;
-      --text:#f5f7fa;
-      --muted:#9ca6b2;
-      --accent:#39d98a;
-      --border:#28303a;
+    * {
+      box-sizing: border-box;
     }
-    *{box-sizing:border-box}
-    body{
-      margin:0;
-      min-height:100vh;
-      display:grid;
-      place-items:center;
-      font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,sans-serif;
-      background:var(--bg);
-      color:var(--text);
+
+    html,
+    body {
+      margin: 0;
+      padding: 0;
+      background: #1f1f1f;
+      font-family: Arial, Helvetica, sans-serif;
     }
-    .app{
-      width:min(92vw,430px);
-      padding:28px;
-      border:1px solid var(--border);
-      border-radius:24px;
-      background:var(--panel);
-      text-align:center;
+
+    body {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
     }
-    .eyebrow{
-      font-size:12px;
-      letter-spacing:.14em;
-      color:var(--muted);
-      font-weight:700;
+
+    .relogio {
+      width: 240px;
+      background: #252525;
+      border-radius: 8px;
+      text-align: center;
+      padding: 9px 10px 10px;
+      color: white;
     }
-    .clock{
-      margin-top:10px;
-      font-size:23px;
-      font-weight:700;
-      font-variant-numeric:tabular-nums;
+
+    .hora {
+      font-size: 48px;
+      line-height: 1;
+      font-weight: 700;
+      letter-spacing: 1px;
+      font-variant-numeric: tabular-nums;
+      white-space: nowrap;
     }
-    .ring{
-      position:relative;
-      width:235px;
-      height:235px;
-      margin:26px auto 20px;
-      display:grid;
-      place-items:center;
+
+    .timer {
+      margin-top: 8px;
+      font-size: 11px;
+      color: #e5e5e5;
     }
-    svg{
-      width:100%;
-      height:100%;
-      transform:rotate(-90deg);
-      position:absolute;
-      inset:0;
-    }
-    .track{
-      fill:none;
-      stroke:#252c34;
-      stroke-width:11;
-    }
-    .progress{
-      fill:none;
-      stroke:var(--accent);
-      stroke-width:11;
-      stroke-linecap:round;
-      transition:stroke-dashoffset .08s linear;
-    }
-    .seconds{
-      font-size:64px;
-      line-height:1;
-      font-weight:800;
-      font-variant-numeric:tabular-nums;
-    }
-    .unit{
-      color:var(--muted);
-      margin-top:7px;
-      font-size:14px;
-    }
-    .next{
-      margin-top:14px;
-      padding:16px;
-      background:var(--panel2);
-      border-radius:16px;
-    }
-    .next small{
-      display:block;
-      color:var(--muted);
-      margin-bottom:4px;
-    }
-    .next strong{
-      font-size:22px;
-      font-variant-numeric:tabular-nums;
-    }
-    .foot{
-      margin-top:16px;
-      color:var(--muted);
-      font-size:13px;
-      line-height:1.5;
+
+    .segundos {
+      font-weight: 700;
+      color: #ffffff;
+      font-variant-numeric: tabular-nums;
     }
   </style>
 </head>
+
 <body>
-  <main class="app">
-    <div class="eyebrow">TIMER SINCRONIZADO</div>
-    <div id="clock" class="clock">--:--:--</div>
 
-    <div class="ring">
-      <svg viewBox="0 0 240 240" aria-hidden="true">
-        <circle class="track" cx="120" cy="120" r="103"></circle>
-        <circle id="progress" class="progress" cx="120" cy="120" r="103"></circle>
-      </svg>
-      <div>
-        <div id="seconds" class="seconds">30.0</div>
-        <div class="unit">segundos</div>
-      </div>
+  <div class="relogio">
+
+    <div id="hora" class="hora">
+      00:00:00
     </div>
 
-    <div class="next">
-      <small>Próximo reset</small>
-      <strong id="next">--:--:--</strong>
+    <div class="timer">
+      Próximo reset em
+      <span id="timer" class="segundos">30.0s</span>
     </div>
 
-    <div class="foot">
-      Reinicia automaticamente nos segundos <b>:00</b> e <b>:30</b> de cada minuto.
-    </div>
-  </main>
+  </div>
 
   <script>
-    const clockEl = document.getElementById('clock');
-    const secEl = document.getElementById('seconds');
-    const nextEl = document.getElementById('next');
-    const progress = document.getElementById('progress');
+    const horaElemento = document.getElementById("hora");
+    const timerElemento = document.getElementById("timer");
 
-    const r = 103;
-    const circumference = 2 * Math.PI * r;
-    progress.style.strokeDasharray = circumference;
-
-    const pad = n => String(n).padStart(2,'0');
-
-    function fmt(d){
-      return `${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`;
+    function adicionarZero(numero) {
+      return String(numero).padStart(2, "0");
     }
 
-    function tick(){
-      const now = new Date();
-      const msIntoMinute = now.getSeconds()*1000 + now.getMilliseconds();
-      const msIntoCycle = msIntoMinute % 30000;
-      const remaining = 30000 - msIntoCycle;
-      const seconds = remaining / 1000;
-      const nextReset = new Date(now.getTime() + remaining);
+    function atualizarRelogio() {
+      const agora = new Date();
 
-      clockEl.textContent = fmt(now);
-      secEl.textContent = seconds.toFixed(1);
-      nextEl.textContent = fmt(nextReset);
+      const horas = adicionarZero(agora.getHours());
+      const minutos = adicionarZero(agora.getMinutes());
+      const segundos = adicionarZero(agora.getSeconds());
 
-      const fraction = remaining / 30000;
-      progress.style.strokeDashoffset = circumference * (1 - fraction);
+      horaElemento.textContent =
+        `${horas}:${minutos}:${segundos}`;
 
-      requestAnimationFrame(tick);
+      const milissegundosNoMinuto =
+        agora.getSeconds() * 1000 +
+        agora.getMilliseconds();
+
+      const tempoNoCiclo =
+        milissegundosNoMinuto % 30000;
+
+      const restante =
+        30000 - tempoNoCiclo;
+
+      timerElemento.textContent =
+        (restante / 1000).toFixed(1) + "s";
+
+      requestAnimationFrame(atualizarRelogio);
     }
-    tick();
 
-    if ('serviceWorker' in navigator && location.protocol.startsWith('http')) {
-      navigator.serviceWorker.register('./sw.js').catch(()=>{});
-    }
+    atualizarRelogio();
   </script>
+
 </body>
 </html>
